@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: app
+  name: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: app
+  template:
+    metadata:
+      labels:
+        name: app
+    spec:
+      containers:
+      - image: devops-app:latest
+        name: devops-app
+        ports:
+        - containerPort: 3000
+        imagePullPolicy: IfNotPresent
+      - image: devops-nginx:latest
+        name: devops-nginx
+        ports:
+        - containerPort: 82
+        imagePullPolicy: IfNotPresent
