@@ -1,0 +1,33 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+      - chmod +x kubectl
+      - mv ./kubectl /usr/local/bin/kubectl
+      - wget https://storage.googleapis.com/kubernetes-helm/helm-v2.14.0-linux-amd64.tar.gz -O helm.tar.gz; tar -xzf helm.tar.gz
+      - chmod +x ./linux-amd64/helm
+      - mv ./linux-amd64/helm /usr/local/bin/helm
+  pre_build:
+    commands:
+      - "mkdir ~/.kube/"
+      - "cp config ~/.kube/config"
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image... 
+      - cd app 
+      - docker build -t $REPOSITORY_URI/$IMAGE_APP_NAME:$IMAGE_TAG . 
+      - cd nginx 
+      - docker build -t $REPOSITORY_URI/$IMAGE_NGINX_NAME:$IMAGE_TAG . 
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $REPOSITORY_URI/$IMAGE_APP_NAME:$IMAGE_TAG
+      - docker push $REPOSITORY_URI/$IMAGE_NGINX_NAME:$IMAGE_TAG
+      - helm upgrade -i myappv1 /helm/components/app -f ./helm/components/app/values.yaml

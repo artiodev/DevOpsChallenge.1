@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "app.name" . }}
+    chart: {{ template "app.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  name: {{ template "app.name" . }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      name: {{ template "app.name" . }}
+  template:
+    metadata:
+      labels:
+        name: {{ template "app.name" . }}
+    spec:
+      containers:
+      - image: "{{ template "app.image" . }}"
+        name: devops-app
+        ports:
+        - containerPort: 3000
+        imagePullPolicy: IfNotPresent
+      - image: "{{ template "nginx.image" . }}"
+        name: devops-nginx
+        ports:
+        - containerPort: 82
+        imagePullPolicy: IfNotPresent

@@ -1,0 +1,18 @@
+global:
+  domain: cluster.local
+  # imageRegistry: myRegistryName
+  # imagePullSecrets:
+  #   - myRegistryKeySecretName
+
+nodePort: 30007
+replicas: 1
+
+image:
+  app:
+    registry: 487176977649.dkr.ecr.eu-central-1.amazonaws.com
+    repository: devops-app
+    tag: latest
+  nginx:
+    registry: 487176977649.dkr.ecr.eu-central-1.amazonaws.com
+    repository: devops-nginx
+    tag: latest
